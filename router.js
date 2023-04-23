@@ -5,19 +5,27 @@ const crypto = require('crypto');
 // routes for the app
 module.exports = (app) => {
     // homepage route
-    app.get([ '/' ], async (req, res) => {
+    app.get(['/'], async (req, res) => {
         const { session } = req;
-        
+
         // sets session token when page loads
-        if(!session.token) {
+        if (!session.token) {
             session.token = crypto.randomUUID();
+        }
+        if (!session.answers) {
+            session.answers = [];
         }
 
         let surveys = await db.$.SURVEY.GET_ALL();
-        console.log(surveys);
+
+        let allQuestionsAndAnswers = {
+            questions: session.questions || [],
+            answers: session.answers || []
+        }
 
         res.render('home', {
-            surveys: surveys || []
+            surveys: surveys || [],
+            questionsAnswers: allQuestionsAndAnswers
         });
     });
 

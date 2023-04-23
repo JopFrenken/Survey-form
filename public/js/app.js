@@ -1,6 +1,7 @@
 let quizContainer = document.querySelector('.quiz-container');
 let questionButton = document.querySelector('.btn-question');
 let questionInput = document.querySelector("#questions");
+let resetButton = document.querySelector(".reset-btn");
 let truncateButton = document.querySelector(".truncate-btn");
 
 let questionAmount = 0;
@@ -8,6 +9,8 @@ let questionText = "";
 let questionArr = [];
 let allQuestionsFilledIn = false;
 let questionIndex = 0;
+
+//#region question logic
 
 const sendQuestionAmount = () => {
     questionButton.addEventListener('click', () => {
@@ -17,13 +20,13 @@ const sendQuestionAmount = () => {
         if (!isNaN(questionContent) && questionContent.trim() !== '') {
             questionContent = Number(questionContent);
 
-			// stops function when amount is not correct
-			if(questionContent < 3 || questionContent > 10) {
-				toastr.error("The question amount must be between 3 and 10.", {timeOut: 2000});
-				return;
-			}
+            // stops function when amount is not correct
+            if (questionContent < 3 || questionContent > 10) {
+                toastr.error("The question amount must be between 3 and 10.", { timeOut: 2000 });
+                return;
+            }
 
-           	let obj = {
+            let obj = {
                 questions: questionContent,
                 step: 2
             };
@@ -36,18 +39,18 @@ const sendQuestionAmount = () => {
                     "Content-Type": "application/json"
                 }
             })
-            .then(response => {
-                return response.json();
-            })
-            .then(data => {
-                questionAmount = data.questionAmount;
-                toastr.success(data.message, "Questions saved", {timeOut: 2000});
-                displayQuestionBoxes();
-            })
-            .catch(error => {
-                console.error(error);
-                toastr.error("Failed to set question session.", "Error", {timeOut: 3000});
-            });
+                .then(response => {
+                    return response.json();
+                })
+                .then(data => {
+                    questionAmount = data.questionAmount;
+                    toastr.success(data.message, "Questions saved", { timeOut: 2000 });
+                    displayQuestionBoxes();
+                })
+                .catch(error => {
+                    console.error(error);
+                    toastr.error("Failed to set question session.", "Error", { timeOut: 3000 });
+                });
 
         } else {
             console.log("not a number");
@@ -61,46 +64,46 @@ const displayQuestionBoxes = () => {
     }
 
     for (let i = 0; i < questionAmount; i++) {
-		// adds new html when question amount is submitted
+        // adds new html when question amount is submitted
         const questionLabel = document.createElement('label');
-		const questionTextBox = document.createElement("input");
+        const questionTextBox = document.createElement("input");
 
-		questionLabel.textContent = `Question: ${i + 1}`;
-		questionLabel.classList.add("mt-4");
-		questionTextBox.classList.add("form-control", "question-input", "mt-4");
+        questionLabel.textContent = `Question: ${i + 1}`;
+        questionLabel.classList.add("mt-4");
+        questionTextBox.classList.add("form-control", "question-input", "mt-4");
 
         quizContainer.appendChild(questionLabel);
-		quizContainer.appendChild(questionTextBox);     
+        quizContainer.appendChild(questionTextBox);
     }
 
-	const submitQuestionButton = document.createElement('button');
-	submitQuestionButton.textContent = "Submit questions";
-	submitQuestionButton.classList.add("btn", "btn-primary", "mt-5");
-	quizContainer.appendChild(submitQuestionButton);
-	const allQuestions = document.querySelectorAll('.question-input');   
-	
-	submitQuestionButton.addEventListener(('click'), () => {
-		sendQuestions(allQuestions);
-	})
+    const submitQuestionButton = document.createElement('button');
+    submitQuestionButton.textContent = "Submit questions";
+    submitQuestionButton.classList.add("btn", "btn-primary", "mt-5");
+    quizContainer.appendChild(submitQuestionButton);
+    const allQuestions = document.querySelectorAll('.question-input');
+
+    submitQuestionButton.addEventListener(('click'), () => {
+        sendQuestions(allQuestions);
+    })
 }
 
 const sendQuestions = (arr) => {
-	arr.forEach((element, index) => {
-		if(element.value === "") {
-			// goes out of the function when there's an empty question input
-			toastr.error(`Please fill in question ${index + 1}.`, {timeOut: 1500})
-			return;
-		}
-            questionArr.push(element.value);
-            allQuestionsFilledIn = true;
-	})
+    arr.forEach((element, index) => {
+        if (element.value === "") {
+            // goes out of the function when there's an empty question input
+            toastr.error(`Please fill in question ${index + 1}.`, { timeOut: 1500 })
+            return;
+        }
+        questionArr.push(element.value);
+        allQuestionsFilledIn = true;
+    })
 
-    if(allQuestionsFilledIn) {
+    if (allQuestionsFilledIn) {
         let obj = {
             questions: questionArr,
             step: 3
         }
-        
+
         // sets session
         fetch("api/question-text", {
             method: "POST",
@@ -109,17 +112,17 @@ const sendQuestions = (arr) => {
                 "Content-Type": "application/json"
             }
         })
-        .then(response => {
-            return response.json();
-        })
-        .then(data => {
-            toastr.success(data.message, "Success", {timeOut: 2000});
-            displayQuestions(data.questions);
-        })
-        .catch(error => {
-            console.error(error);
-            toastr.error("Failed to set question session.", "Error", {timeOut: 3000});
-        });
+            .then(response => {
+                return response.json();
+            })
+            .then(data => {
+                toastr.success(data.message, "Success", { timeOut: 2000 });
+                displayQuestions(data.questions);
+            })
+            .catch(error => {
+                console.error(error);
+                toastr.error("Failed to set question session.", "Error", { timeOut: 3000 });
+            });
     }
 }
 
@@ -129,15 +132,16 @@ const displayQuestions = (questions) => {
     }
 
     const displayNextQuestion = (index) => {
+        getSessionTable();
         const question = questions[index];
 
         // display question
         const questionDiv = document.createElement('div');
-        questionDiv.classList.add('question');
+        questionDiv.classList.add('question', "d-flex", "align-items-center", "flex-column");
         questionDiv.innerHTML = `
         <h2>Question ${index + 1}</h2>
         <p>${question}</p>
-        <input type="text" id="answer" class='answer' name="answer">
+        <input type="text" id="answer" class='answer form-control' name="answer">
         `;
         quizContainer.appendChild(questionDiv);
 
@@ -147,11 +151,15 @@ const displayQuestions = (questions) => {
         nextButton.classList.add("btn", "btn-primary", "mt-5");
         quizContainer.appendChild(nextButton);
 
+        const submitButton = document.createElement('button');
+        submitButton.textContent = "End survey";
+        submitButton.classList.add("btn", "btn-primary", "mt-5");
+
         // go to next question on button click
         nextButton.addEventListener('click', () => {
             let answer = document.querySelector('.answer').value;
-            if(answer == "") {
-                toastr.error("Please answer the question.", {timeOut: 2000})
+            if (answer == "") {
+                toastr.error("Please answer the question.", { timeOut: 2000 })
                 return;
             }
             let obj = {
@@ -160,25 +168,7 @@ const displayQuestions = (questions) => {
                 current_question: question
             }
 
-            // set session
-            fetch("api/question-answer", {
-                method: "POST",
-                body: JSON.stringify(obj),
-                headers: {
-                    "Content-Type": "application/json"
-                }
-            })
-            .then(response => {
-                return response.json();
-            })
-            .then(data => {
-                questionAmount = data.questionAmount;
-                toastr.success(data.message, {timeOut: 2000});
-            })
-            .catch(error => {
-                console.error(error);
-                toastr.error("Failed to set question session.", "Error", {timeOut: 3000});
-            });
+            submitQuestions(obj);
 
             quizContainer.removeChild(questionDiv);
             quizContainer.removeChild(nextButton);
@@ -187,8 +177,14 @@ const displayQuestions = (questions) => {
                 displayNextQuestion(index + 1);
             } else {
                 // reached the end of the questions
-                toastr.success("You've reached the end of the questions.", "Success", {timeOut: 2000});
-                destroySession();
+                toastr.success("You've reached the end of the questions.", "Success", { timeOut: 2000 });
+                while (quizContainer.firstChild) {
+                    quizContainer.removeChild(quizContainer.firstChild)
+                }
+                quizContainer.appendChild(submitButton);
+                submitButton.addEventListener(('click'), () => {
+                    destroySession();
+                })
             }
         });
     };
@@ -196,20 +192,47 @@ const displayQuestions = (questions) => {
     displayNextQuestion(questionIndex);
 };
 
+const submitQuestions = (obj) => {
+    // set session
+    fetch("api/question-answer", {
+        method: "POST",
+        body: JSON.stringify(obj),
+        headers: {
+            "Content-Type": "application/json"
+        }
+    })
+        .then(response => {
+            return response.json();
+        })
+        .then(data => {
+            questionAmount = data.questionAmount;
+            toastr.success(data.message, { timeOut: 2000 });
+            getSessionTable();
+        })
+        .catch(error => {
+            console.error(error);
+            toastr.error("Failed to set question session.", "Error", { timeOut: 3000 });
+        });
+}
+
+//#endregion
+
+//#region step logic
+
 const getCurrentStep = () => {
     fetch("api/step", {
-      method: "GET"
+        method: "GET"
     })
-    .then(response => {
-      return response.json();
-    })
-    .then(data => {
-      displayPageByStep(data);
-    })
-    .catch(error => {
-      console.error(error);
-      toastr.error("Failed to set question session.", "Error", {timeOut: 2000});
-    });
+        .then(response => {
+            return response.json();
+        })
+        .then(data => {
+            displayPageByStep(data);
+        })
+        .catch(error => {
+            console.error(error);
+            toastr.error("Failed to set question session.", "Error", { timeOut: 2000 });
+        });
 }
 
 const displayPageByStep = (data) => {
@@ -217,44 +240,66 @@ const displayPageByStep = (data) => {
         case 1:
             console.log("Do nothing");
             break;
-        case 2: 
+        case 2:
             questionAmount = data.questionAmount;
             displayQuestionBoxes();
             break;
         case 3:
-            if("questionIndex" in data) {
+            if ("questionIndex" in data) {
                 questionIndex = data.questionIndex;
             } else questionIndex = 0
             displayQuestions(data.allQuestions);
+            getSessionTable();
     }
 }
 
+//#endregion
+
+//#region session functions
 const destroySession = () => {
     fetch("api/destroy-session", {
-      method: "GET"
+        method: "GET"
     })
-    .then(data => {
-      window.location.reload();
+        .then(data => {
+            window.location.reload();
+        })
+        .catch(error => {
+            console.error(error);
+        });
+}
+
+const getSessionTable = async () => {
+    const response = await fetch('api/session-table');
+    const html = await response.text();
+    document.querySelector('.session-table-container').innerHTML = html;
+}
+//#endregion
+
+//#region button events
+
+const reset = () => {
+    resetButton.addEventListener(('click'), () => {
+        destroySession();
     })
-    .catch(error => {
-      console.error(error);
-    });
 }
 
 const truncate = () => {
     truncateButton.addEventListener(('click'), () => {
-    fetch("api/truncate", {
-    method: "GET"
-    })
-    .then(data => {
-      window.location.reload();
-    })
-    .catch(error => {
-      console.error(error);
-    });
+        fetch("api/truncate", {
+            method: "GET"
+        })
+            .then(data => {
+                window.location.reload();
+            })
+            .catch(error => {
+                console.error(error);
+            });
     })
 }
 
+//#endregion
+
 sendQuestionAmount();
-getCurrentStep();   
+getCurrentStep();
+reset();
 truncate();

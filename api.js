@@ -2,7 +2,7 @@ const db = require("./utils/Database.js");
 
 // api endpoints
 module.exports = (app) => {
-    app.get([ '/api/step' ], async (req, res) => {
+    app.get(['/api/step'], async (req, res) => {
         const { session } = req;
         let step = session.step || 1;
 
@@ -11,19 +11,19 @@ module.exports = (app) => {
             questionAmount: session.question_amount,
             allQuestions: session.questions,
             currentQuestion: session.current_question,
-            questionIndex: session.question_index   
+            questionIndex: session.question_index
         })
     });
 
-    app.post([ '/api/question-amount'], async (req, res) => {
+    app.post(['/api/question-amount'], async (req, res) => {
         const { body, session } = req;
         session.question_amount = body.questions;
         session.step = 2;
         let questionAmount = session.question_amount;
-        res.json({ message: "Question session set.", questionAmount: questionAmount}); 
+        res.json({ message: "Question session set.", questionAmount: questionAmount });
     })
 
-    app.post([ '/api/question-text'], async (req, res) => {
+    app.post(['/api/question-text'], async (req, res) => {
         const { body, session } = req;
         session.step = 3;
         session.questions = [];
@@ -32,13 +32,14 @@ module.exports = (app) => {
             session.questions.push(question);
         })
 
-        res.json({ message: "Question session set.", questions: session.questions}); 
+        res.json({ message: "Question session set.", questions: session.questions });
     })
 
-    app.post([ '/api/question-answer'], async (req, res) => {
+    app.post(['/api/question-answer'], async (req, res) => {
         const { body, session } = req;
         session.question_index = body.index;
         session.current_question = body.current_question;
+        session.answers.push(body.answer);
 
         db.$.SURVEY.SEND({
             token: session.token,
@@ -46,21 +47,36 @@ module.exports = (app) => {
             answer: body.answer
         });
 
-        res.json({ 
+        res.json({
             message: "Question answered.",
             index: session.question_index,
-            currentQuestion: session.current_question
-        }); 
+            currentQuestion: session.current_question,
+            answers: session.answers
+        });
     })
 
-    app.get(['/api/destroy-session'], async (req,res) =>{
+    app.get(['/api/destroy-session'], async (req, res) => {
         const { session } = req;
         session.destroy();
-        res.json({message: "Session Destroyed"});
+        res.json({ message: "Session Destroyed" });
     })
 
-    app.get(['/api/truncate'], async (req,res) =>{
+    app.get(['/api/truncate'], async (req, res) => {
         db.$.SURVEY.TRUNCATE();
-        res.json({message: "Truncated"});
+        res.json({ message: "Truncated" });
+    })
+
+    // display session table
+    app.get(['/api/session-table'], async (req, res) => {
+        const { session } = req;
+        let allQuestionsAndAnswers = {
+            questions: session.questions || [],
+            answers: session.answers || []
+        }
+        // console.log(allQuestionsAndAnswers);
+
+        res.render('components/sessionTable', {
+            questionsAnswers: allQuestionsAndAnswers
+        });
     })
 }

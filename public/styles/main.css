@@ -1,5 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
-
-.question-input, .question-amount-input{
+.question-input,
+.question-amount-input,
+.answer {
     width: 500px;
 }
