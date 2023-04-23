@@ -59,6 +59,7 @@ const sendQuestionAmount = () => {
 }
 
 const displayQuestionBoxes = () => {
+    // removes any children in the quizcontainer
     while (quizContainer.firstChild) {
         quizContainer.removeChild(quizContainer.firstChild)
     }
@@ -76,6 +77,7 @@ const displayQuestionBoxes = () => {
         quizContainer.appendChild(questionTextBox);
     }
 
+    // adds submit button html
     const submitQuestionButton = document.createElement('button');
     submitQuestionButton.textContent = "Submit questions";
     submitQuestionButton.classList.add("btn", "btn-primary", "mt-5");
@@ -127,6 +129,7 @@ const sendQuestions = (arr) => {
 }
 
 const displayQuestions = (questions) => {
+    // removes any children in the quizcontainer
     while (quizContainer.firstChild) {
         quizContainer.removeChild(quizContainer.firstChild)
     }
@@ -135,7 +138,7 @@ const displayQuestions = (questions) => {
         getSessionTable();
         const question = questions[index];
 
-        // display question
+        // display question and the html for the question
         const questionDiv = document.createElement('div');
         questionDiv.classList.add('question', "d-flex", "align-items-center", "flex-column");
         questionDiv.innerHTML = `
@@ -151,6 +154,7 @@ const displayQuestions = (questions) => {
         nextButton.classList.add("btn", "btn-primary", "mt-5");
         quizContainer.appendChild(nextButton);
 
+        // creates submit button
         const submitButton = document.createElement('button');
         submitButton.textContent = "End survey";
         submitButton.classList.add("btn", "btn-primary", "mt-5");
@@ -168,8 +172,10 @@ const displayQuestions = (questions) => {
                 current_question: question
             }
 
+            // sends question and answer to database
             submitQuestions(obj);
 
+            // removes so it can add another one
             quizContainer.removeChild(questionDiv);
             quizContainer.removeChild(nextButton);
 
@@ -178,6 +184,7 @@ const displayQuestions = (questions) => {
             } else {
                 // reached the end of the questions
                 toastr.success("You've reached the end of the questions.", "Success", { timeOut: 2000 });
+                // removes any children in the quizcontainer
                 while (quizContainer.firstChild) {
                     quizContainer.removeChild(quizContainer.firstChild)
                 }
@@ -220,6 +227,7 @@ const submitQuestions = (obj) => {
 //#region step logic
 
 const getCurrentStep = () => {
+    // request for step data from session
     fetch("api/step", {
         method: "GET"
     })
@@ -236,20 +244,20 @@ const getCurrentStep = () => {
 }
 
 const displayPageByStep = (data) => {
+    // knows what to display based on step gotten from session
     switch (data.step) {
-        case 1:
+        case 1: // base view
             console.log("Do nothing");
             break;
-        case 2:
+        case 2: // question boxes
             questionAmount = data.questionAmount;
             displayQuestionBoxes();
             break;
-        case 3:
+        case 3: // individual question
             if ("questionIndex" in data) {
                 questionIndex = data.questionIndex;
             } else questionIndex = 0
             displayQuestions(data.allQuestions);
-            getSessionTable();
     }
 }
 
@@ -257,6 +265,7 @@ const displayPageByStep = (data) => {
 
 //#region session functions
 const destroySession = () => {
+    // request to destroy the session
     fetch("api/destroy-session", {
         method: "GET"
     })
@@ -269,6 +278,7 @@ const destroySession = () => {
 }
 
 const getSessionTable = async () => {
+    // dynamically updates session table without reloading
     const response = await fetch('api/session-table');
     const html = await response.text();
     document.querySelector('.session-table-container').innerHTML = html;
@@ -285,6 +295,7 @@ const reset = () => {
 
 const truncate = () => {
     truncateButton.addEventListener(('click'), () => {
+        // request to truncate table
         fetch("api/truncate", {
             method: "GET"
         })
