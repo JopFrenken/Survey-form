@@ -1,0 +1,14 @@
+{
+    "watch": [
+        "api.js",
+        "router.js",
+        "server.js",
+        "nodemon.json"
+    ],
+    "ext": "js, css",
+    "ignore": [
+        ".git",
+        "node_modules/**/node_modules",
+        "public"
+    ]
+}
