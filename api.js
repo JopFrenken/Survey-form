@@ -1,7 +1,9 @@
+const session = require("express-session");
 const db = require("./utils/Database.js");
 
 // api endpoints
 module.exports = (app) => {
+    // gets data from session
     app.get(['/api/step'], async (req, res) => {
         const { session } = req;
         let step = session.step || 1;
@@ -15,6 +17,7 @@ module.exports = (app) => {
         })
     });
 
+    // saves question amount in session
     app.post(['/api/question-amount'], async (req, res) => {
         const { body, session } = req;
         session.question_amount = body.questions;
@@ -23,6 +26,7 @@ module.exports = (app) => {
         res.json({ message: "Question session set.", questionAmount: questionAmount });
     })
 
+    // saves question in session
     app.post(['/api/question-text'], async (req, res) => {
         const { body, session } = req;
         session.step = 3;
@@ -35,6 +39,7 @@ module.exports = (app) => {
         res.json({ message: "Question session set.", questions: session.questions });
     })
 
+    // puts question & answer in database
     app.post(['/api/question-answer'], async (req, res) => {
         const { body, session } = req;
         session.question_index = body.index;
@@ -55,15 +60,23 @@ module.exports = (app) => {
         });
     })
 
+    // destroys current session
     app.get(['/api/destroy-session'], async (req, res) => {
         const { session } = req;
         session.destroy();
         res.json({ message: "Session Destroyed" });
     })
 
+    // truncates table
     app.get(['/api/truncate'], async (req, res) => {
         db.$.SURVEY.TRUNCATE();
         res.json({ message: "Truncated" });
+    })
+
+    // sets step to 4
+    app.get(['/api/submitButton'], async (req, res) => {
+        session.step = 4;
+        res.json({ message: "Step 4 set" });
     })
 
     // display session table

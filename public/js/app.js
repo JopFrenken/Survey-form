@@ -4,6 +4,11 @@ let questionInput = document.querySelector("#questions");
 let resetButton = document.querySelector(".reset-btn");
 let truncateButton = document.querySelector(".truncate-btn");
 
+// creates submit button
+const submitButton = document.createElement('button');
+submitButton.textContent = "End survey";
+submitButton.classList.add("btn", "btn-primary", "mt-5");
+
 let questionAmount = 0;
 let questionText = "";
 let questionArr = [];
@@ -154,11 +159,6 @@ const displayQuestions = (questions) => {
         nextButton.classList.add("btn", "btn-primary", "mt-5");
         quizContainer.appendChild(nextButton);
 
-        // creates submit button
-        const submitButton = document.createElement('button');
-        submitButton.textContent = "End survey";
-        submitButton.classList.add("btn", "btn-primary", "mt-5");
-
         // go to next question on button click
         nextButton.addEventListener('click', () => {
             let answer = document.querySelector('.answer').value;
@@ -191,6 +191,10 @@ const displayQuestions = (questions) => {
                 quizContainer.appendChild(submitButton);
                 submitButton.addEventListener(('click'), () => {
                     destroySession();
+                })
+
+                fetch("api/submitButton", {
+                    method: "GET"
                 })
             }
         });
@@ -258,6 +262,15 @@ const displayPageByStep = (data) => {
                 questionIndex = data.questionIndex;
             } else questionIndex = 0
             displayQuestions(data.allQuestions);
+        case 4:
+            // removes any children in the quizcontainer
+            while (quizContainer.firstChild) {
+                quizContainer.removeChild(quizContainer.firstChild)
+            }
+            quizContainer.appendChild(submitButton);
+            submitButton.addEventListener(('click'), () => {
+                destroySession();
+            })
     }
 }
 
